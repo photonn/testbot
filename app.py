@@ -9,12 +9,11 @@ logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(
 
 app = Flask(__name__)
 
-# Initialize the Bot Framework Adapter
-adapter_settings = BotFrameworkAdapterSettings("YourAppID", "YourAppPassword")
-adapter = BotFrameworkAdapter(adapter_settings)
-
 app_id = os.getenv("MICROSOFT_APP_ID")
 app_password = os.getenv("MICROSOFT_APP_PASSWORD")
+# Initialize the Bot Framework Adapter with environment variables
+adapter_settings = BotFrameworkAdapterSettings(app_id, app_password)
+adapter = BotFrameworkAdapter(adapter_settings)
 
 # Define the bot's behavior
 class EchoBot:
@@ -27,21 +26,30 @@ class EchoBot:
 # Instantiate the bot
 bot = EchoBot()
 
-# Define the /api/messages endpoint
+import asyncio
+# Define the /api/messages endpoint (sync for Flask)
 @app.route("/api/messages", methods=["POST"])
-async def messages():
-    if "application/json" in request.headers["Content-Type"]:
-        activity = Activity().deserialize(request.json)
-        auth_header = request.headers.get("Authorization", "")
-        logging.info(f"Processing activity: {activity}")
-        response = await adapter.process_activity(activity, auth_header, bot.on_turn)
-        if response:
-            logging.info(f"Response: {response.body}")
-            return jsonify(response.body), response.status
-        return "", 202
-    else:
-        logging.warning("Invalid content type")
-        return "Content-Type must be application/json", 415
+def messages():
+    try:
+        if "application/json" in request.headers.get("Content-Type", ""):
+            activity = Activity().deserialize(request.json)
+            auth_header = request.headers.get("Authorization", "")
+            logging.info(f"Processing activity: {activity}")
+            loop = asyncio.new_event_loop()
+            asyncio.set_event_loop(loop)
+            response = loop.run_until_complete(
+                adapter.process_activity(activity, auth_header, bot.on_turn)
+            )
+            if response:
+                logging.info(f"Response: {response.body}")
+                return jsonify(response.body), response.status
+            return "", 202
+        else:
+            logging.warning("Invalid content type")
+            return "Content-Type must be application/json", 415
+    except Exception as e:
+        logging.error(f"Exception in /api/messages: {e}", exc_info=True)
+        return jsonify({"error": str(e)}), 500
 
 # Define the /health endpoint
 @app.route("/health", methods=["GET"])
