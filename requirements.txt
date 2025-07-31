@@ -1,1 +1,2 @@
-Flask
+Flask==3.0.3
+botbuilder-core==4.17.0
