@@ -13,6 +13,12 @@ if connection_string:
     logger.addHandler(AzureLogHandler(connection_string=connection_string))
     logger.setLevel(logging.INFO)
 
+
+# Health check endpoint
+@app.route('/health', methods=['GET'])
+def health():
+    return jsonify({"status": "healthy"}), 200
+
 @app.route('/api/messages', methods=['POST'])
 def echo():
     data = request.json
