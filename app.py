@@ -1,17 +1,14 @@
-from flask import Flask, request, jsonify
-from opencensus.ext.azure.log_exporter import AzureLogHandler
+
 import logging
-import os
+from flask import Flask, request, jsonify
+
 
 
 app = Flask(__name__)
 
-# Configure Azure Application Insights
-connection_string = os.getenv("APPLICATIONINSIGHTS_CONNECTION_STRING", "")
+# Configure standard logging
+logging.basicConfig(level=logging.INFO, format='%(asctime)s %(levelname)s %(message)s')
 logger = logging.getLogger(__name__)
-if connection_string:
-    logger.addHandler(AzureLogHandler(connection_string=connection_string))
-    logger.setLevel(logging.INFO)
 
 
 # Health check endpoint
@@ -25,7 +22,7 @@ def echo():
         data = request.json
         user_message = data.get('text', '')
         reply = {"type": "message", "text": f"You said: {user_message}"}
-        # Log the incoming message to Application Insights
+        # Log the incoming message
         logger.info(f"Received message: {user_message}")
         return jsonify(reply)
     except Exception as e:
