@@ -21,12 +21,16 @@ def health():
 
 @app.route('/api/messages', methods=['POST'])
 def echo():
-    data = request.json
-    user_message = data.get('text', '')
-    reply = {"type": "message", "text": f"You said: {user_message}"}
-    # Log the incoming message to Application Insights
-    logger.info(f"Received message: {user_message}")
-    return jsonify(reply)
+    try:
+        data = request.json
+        user_message = data.get('text', '')
+        reply = {"type": "message", "text": f"You said: {user_message}"}
+        # Log the incoming message to Application Insights
+        logger.info(f"Received message: {user_message}")
+        return jsonify(reply)
+    except Exception as e:
+        logger.error(f"Error in /api/messages: {e}", exc_info=True)
+        return jsonify({"error": str(e)}), 500
 
 if __name__ == '__main__':
     app.run(debug=True, port=3978)
