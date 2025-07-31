@@ -3,36 +3,27 @@ import logging
 from flask import Flask, request, jsonify
 from botbuilder.core import BotFrameworkAdapter, BotFrameworkAdapterSettings, TurnContext
 from botbuilder.schema import Activity, ActivityTypes
-from opencensus.ext.azure.log_exporter import AzureLogHandler
-from opencensus.ext.flask.flask_middleware import FlaskMiddleware
-from opencensus.ext.azure.trace_exporter import AzureExporter
-from opencensus.trace.samplers import ProbabilitySampler
+from azure.monitor.opentelemetry import configure_azure_monitor
 
-# Configure Application Insights logging
+# Configure Application Insights using Azure Monitor OpenTelemetry (modern approach)
 app_insights_connection_string = os.getenv("APPLICATIONINSIGHTS_CONNECTION_STRING")
 if app_insights_connection_string:
-    # Configure logging to send to Application Insights
-    logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
-    logger = logging.getLogger(__name__)
-    logger.addHandler(AzureLogHandler(connection_string=app_insights_connection_string))
-    logger.setLevel(logging.INFO)
-    logging.info("Application Insights logging configured successfully")
+    # Configure Azure Monitor telemetry collection
+    configure_azure_monitor(
+        connection_string=app_insights_connection_string,
+        logger_name=__name__
+    )
+    logging.info("Azure Monitor OpenTelemetry configured successfully")
 else:
     # Fallback to basic logging if no connection string
     logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
     logging.warning("APPLICATIONINSIGHTS_CONNECTION_STRING not found, using basic logging")
 
+# Set up basic logging configuration
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+
 app = Flask(__name__)
 logging.info("Starting Flask bot application.")
-
-# Configure Application Insights tracing for Flask
-if app_insights_connection_string:
-    middleware = FlaskMiddleware(
-        app,
-        exporter=AzureExporter(connection_string=app_insights_connection_string),
-        sampler=ProbabilitySampler(rate=1.0)
-    )
-    logging.info("Application Insights tracing middleware configured for Flask")
 
 app_id = os.getenv("MICROSOFT_APP_ID")
 app_password = os.getenv("MICROSOFT_APP_PASSWORD")
