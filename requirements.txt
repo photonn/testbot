@@ -2,3 +2,5 @@ Flask==3.1.1
 botbuilder-core==4.17.0
 python-dotenv==1.1.1
 aiohttp==3.12.15
+opencensus-ext-azure==1.1.13
+opencensus-ext-flask==0.8.0
