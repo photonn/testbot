@@ -25,9 +25,9 @@ logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(
 app = Flask(__name__)
 logging.info("Starting Flask bot application.")
 
-app_id = os.getenv("MICROSOFT_APP_ID")
-app_password = os.getenv("MICROSOFT_APP_PASSWORD")
-app_tenant_id = os.getenv("MICROSOFT_APP_TENANTID")  # Add tenant ID for cross-tenant scenarios
+app_id = os.getenv("MicrosoftAppId")
+app_password = os.getenv("MicrosoftAppPassword")
+app_tenant_id = os.getenv("MicrosoftAppTenantId")  # Add tenant ID for cross-tenant scenarios
 logging.info(f"Loaded environment variables: MICROSOFT_APP_ID={app_id}, MICROSOFT_APP_PASSWORD={'set' if app_password else 'unset'}, TENANT_ID={app_tenant_id}")
 # Initialize the Bot Framework Adapter with environment variables for cross-tenant scenario
 adapter_settings = BotFrameworkAdapterSettings(app_id, app_password)
