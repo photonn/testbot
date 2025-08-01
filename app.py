@@ -32,9 +32,9 @@ logging.info(f"Loaded environment variables: MICROSOFT_APP_ID={app_id}, MICROSOF
 # Initialize the Bot Framework Adapter with environment variables for cross-tenant scenario
 adapter_settings = BotFrameworkAdapterSettings(app_id, app_password)
 # Temporarily disable tenant ID to let Bot Framework auto-discover the correct tenant
-# if app_tenant_id:
-#     adapter_settings.tenant_id = app_tenant_id
-#     logging.info(f"Cross-tenant configuration enabled with tenant ID: {app_tenant_id}")
+if app_tenant_id:
+    adapter_settings.tenant_id = app_tenant_id
+    logging.info(f"Cross-tenant configuration enabled with tenant ID: {app_tenant_id}")
 logging.info("Using auto-discovery for Bot Framework tenant authentication")
 adapter = BotFrameworkAdapter(adapter_settings)
 logging.info("BotFrameworkAdapter initialized.")
