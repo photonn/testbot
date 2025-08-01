@@ -31,11 +31,8 @@ app_tenant_id = os.getenv("MicrosoftAppTenantId")  # Add tenant ID for cross-ten
 app_type = os.getenv("MicrosoftAppType", "SingleTenant")  # Default to SingleTenant if not set
 logging.info(f"Loaded environment variables: MICROSOFT_APP_ID={app_id}, MICROSOFT_APP_PASSWORD={'set' if app_password else 'unset'}, TENANT_ID={app_tenant_id}, APP_TYPE={app_type}")
 # Initialize the Bot Framework Adapter with environment variables for cross-tenant scenario
-adapter_settings = BotFrameworkAdapterSettings(app_id, app_password)
-# Temporarily disable tenant ID to let Bot Framework auto-discover the correct tenant
-if app_tenant_id:
-    adapter_settings.tenant_id = app_tenant_id
-    logging.info(f"Cross-tenant configuration enabled with tenant ID: {app_tenant_id}")
+channel_auth_tenant = app_tenant_id
+adapter_settings = BotFrameworkAdapterSettings(app_id, app_password, channel_auth_tenant)
 
 logging.info("Using auto-discovery for Bot Framework tenant authentication")
 adapter = BotFrameworkAdapter(adapter_settings)
@@ -100,10 +97,11 @@ def health_check():
 def config():
     logging.info("/config endpoint called.")
     config_data = {
-        "app_id": adapter.settings.app_id,
-        "app_password": adapter.settings.app_password,
-        "tenant_id": adapter.settings.tenant_id,
-        "app_type": adapter.settings.app_type
+        "adapter_config": {
+            "app_id": adapter_settings.app_id,
+            "app_password": adapter_settings.app_password,
+            "tenant_id": adapter_settings.channel_auth_tenant
+        }
     }
     logging.info(f"Configuration data: {config_data}")
     return jsonify(config_data), 200
