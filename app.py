@@ -28,13 +28,15 @@ logging.info("Starting Flask bot application.")
 app_id = os.getenv("MicrosoftAppId")
 app_password = os.getenv("MicrosoftAppPassword")
 app_tenant_id = os.getenv("MicrosoftAppTenantId")  # Add tenant ID for cross-tenant scenarios
-logging.info(f"Loaded environment variables: MICROSOFT_APP_ID={app_id}, MICROSOFT_APP_PASSWORD={'set' if app_password else 'unset'}, TENANT_ID={app_tenant_id}")
+app_type = os.getenv("MicrosoftAppType", "SingleTenant")  # Default to SingleTenant if not set
+logging.info(f"Loaded environment variables: MICROSOFT_APP_ID={app_id}, MICROSOFT_APP_PASSWORD={'set' if app_password else 'unset'}, TENANT_ID={app_tenant_id}, APP_TYPE={app_type}")
 # Initialize the Bot Framework Adapter with environment variables for cross-tenant scenario
 adapter_settings = BotFrameworkAdapterSettings(app_id, app_password)
 # Temporarily disable tenant ID to let Bot Framework auto-discover the correct tenant
 if app_tenant_id:
     adapter_settings.tenant_id = app_tenant_id
     logging.info(f"Cross-tenant configuration enabled with tenant ID: {app_tenant_id}")
+
 logging.info("Using auto-discovery for Bot Framework tenant authentication")
 adapter = BotFrameworkAdapter(adapter_settings)
 logging.info("BotFrameworkAdapter initialized.")
@@ -92,6 +94,19 @@ def health_check():
     logging.info("/health endpoint called.")
     logging.info("Health check requested")
     return jsonify({"status": "healthy"}), 200
+
+# Define the /config endpoint that shows the adapter settings directly from adapter settings object
+@app.route("/config", methods=["GET"])
+def config():
+    logging.info("/config endpoint called.")
+    config_data = {
+        "app_id": adapter.settings.app_id,
+        "app_password": adapter.settings.app_password,
+        "tenant_id": adapter.settings.tenant_id,
+        "app_type": adapter.settings.app_type
+    }
+    logging.info(f"Configuration data: {config_data}")
+    return jsonify(config_data), 200
 
 if __name__ == "__main__":
     logging.info("Running Flask app in debug mode on port 3978.")
