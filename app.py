@@ -32,7 +32,7 @@ app_type = os.getenv("MicrosoftAppType", "SingleTenant")  # Default to SingleTen
 logging.info(f"Loaded environment variables: MICROSOFT_APP_ID={app_id}, MICROSOFT_APP_PASSWORD={'set' if app_password else 'unset'}, TENANT_ID={app_tenant_id}, APP_TYPE={app_type}")
 # Initialize the Bot Framework Adapter with environment variables for cross-tenant scenario
 channel_auth_tenant = app_tenant_id
-adapter_settings = BotFrameworkAdapterSettings(app_id, app_password, channel_auth_tenant)
+adapter_settings = BotFrameworkAdapterSettings(app_id, app_password, channel_auth_tenant) #IMPORTANT!!! without this doesnt work. <--------
 
 logging.info("Using auto-discovery for Bot Framework tenant authentication")
 adapter = BotFrameworkAdapter(adapter_settings)
