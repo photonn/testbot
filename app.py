@@ -30,6 +30,8 @@ app_password = os.getenv("MicrosoftAppPassword")
 app_tenant_id = os.getenv("MicrosoftAppTenantId")  # Add tenant ID for cross-tenant scenarios
 app_type = os.getenv("MicrosoftAppType", "SingleTenant")  # Default to SingleTenant if not set
 logging.info(f"Loaded environment variables: MICROSOFT_APP_ID={app_id}, MICROSOFT_APP_PASSWORD={'set' if app_password else 'unset'}, TENANT_ID={app_tenant_id}, APP_TYPE={app_type}")
+# Token used to authenticate access to the /config endpoint
+config_token = os.getenv("CONFIG_TOKEN")
 # Initialize the Bot Framework Adapter with environment variables for cross-tenant scenario
 channel_auth_tenant = app_tenant_id
 adapter_settings = BotFrameworkAdapterSettings(app_id, app_password, channel_auth_tenant) #IMPORTANT!!! without this doesnt work. <--------
@@ -96,6 +98,10 @@ def health_check():
 @app.route("/config", methods=["GET"])
 def config():
     logging.info("/config endpoint called.")
+    auth_header = request.headers.get("Authorization", "")
+    if config_token and auth_header != f"Bearer {config_token}":
+        logging.warning("Unauthorized access attempt to /config endpoint")
+        return jsonify({"error": "Unauthorized"}), 401
     config_data = {
         "adapter_config": {
             "app_id": adapter_settings.app_id,
