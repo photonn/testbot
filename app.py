@@ -92,6 +92,13 @@ def health_check():
     logging.info("Health check requested")
     return jsonify({"status": "healthy"}), 200
 
+# Define the /health endpoint
+@app.route("/", methods=["GET"])
+def health_check():
+    logging.info("/ endpoint called.")
+    logging.info("Health check requested")
+    return jsonify({"status": "healthy"}), 200
+
 # Define the /config endpoint that shows the adapter settings directly from adapter settings object
 @app.route("/config", methods=["GET"])
 def config():
